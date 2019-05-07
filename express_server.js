@@ -10,6 +10,12 @@ var urlDatabase = {
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+app.get("/urls.json", (req, res) => {
+  res.send(urlDatabase);
+});
+app.get("/faq", (req, res) => {
+  res.send("FAQ");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
