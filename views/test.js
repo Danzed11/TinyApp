@@ -7,6 +7,5 @@ function generateRandomString(length) {
   }
   return result;
   }
-  
   console.log(generateRandomString(6));
   
