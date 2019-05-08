@@ -18,13 +18,18 @@ app.get("/urls.json", (req, res) => {
 app.get("/faq", (req, res) => {
   res.send("FAQ");
 });
+app.get("/hello", (req, res) => {
+  let templateVars = { greeting: 'Hello World!!!!' }; //Send "Hello World!!!!" as the variable templateVars to the template "hello_world by re.render()"
+  res.render("hello_world", templateVars);
+});
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };   //When sending variables to and EJS template, we need to have them inside an object
   res.render("urls_index", templateVars);
 });
-app.get("/hello", (req, res) => {
-  let templateVars = { greeting: 'Hello World!!!!' }; //Send "Hello World!!!!" as the variable templateVars to the template "hello_world by re.render()"
-  res.render("hello_world", templateVars);
+
+app.get("/urls/:shortURL", (req, res) => {
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };   //When sending variables to and EJS template, we need to have them inside an object
+  res.render("urls_show", templateVars);
 });
 
 
