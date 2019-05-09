@@ -25,6 +25,20 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
+
 // app.get("/hello", (req, res) => {
 //   res.send("<html><body>Hello <b>World</b></body></html>\n");
 // });
@@ -87,12 +101,28 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-    let templateVars = {username: req.cookies["username"]};
+    let templateVars = { username: req.cookies["username"], error: undefined
+    };
   res.render("registration", templateVars);
 });
+
 app.post("/register", (req, res) => {
-  let templateVars = {username: req.cookies["username"]}; 
-  res.redirect("/urls");                                                                                                                                                                                                                                                                                                                                                                                                                                         
+  if (req.body.email === "" || req.body.password === "") {
+    console.log("empty creds");
+    const templateVars = { error: "Email and Password required", username: undefined
+    }
+    return res.status(400).render("registration", templateVars);
+  }
+  let newID = generateRandomString(6);
+  users[newID] = {
+    id: newID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie("username", req.body.email)                     //Cookies for email memory -- Trying to stay logged in
+  res.redirect("/urls");
+  console.log(users);
+                                                                                                                                                                                                                                                                                                                                                                                                                  
 })
 
 
