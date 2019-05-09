@@ -17,9 +17,10 @@
   <h3>My TinyApp</h3>
   <ul>
       <li> <%=shortURL%>-  <a href= <%=longURL %>> <%= longURL %> </a> </li>
-           
-        
-    <%   %>
+       <form method="POST" action="/urls/<%= shortURL %>/update">
+         <p>Change Long URL: <input name="longURL" type="text"><input type="Submit" ></p>
+          
+       </form>
   </ul>    
 </body>
 </html>
