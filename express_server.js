@@ -28,10 +28,10 @@ const urlDatabase = {
 // app.get("/hello", (req, res) => {
 //   res.send("<html><body>Hello <b>World</b></body></html>\n");
 // });
-app.post("/urls/login", (req, res) => {
-  res.cookie("username", req.body["username"]);       //1st cookie step
-  res.redirect("/urls");
-})
+// app.post("/urls/login", (req, res) => {
+//   res.cookie("username", req.body["username"]);       //1st cookie step
+//   res.redirect("/urls");
+// })
 app.post("/urls/:shortURL/update", (req, res) => {
   const editId = req.params.shortURL;
   let longstring = req.body.longURL;
@@ -76,13 +76,14 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/login", (req,res) => {
   res.cookie("username", req.body.username);
-  // userCookie.username = req.cookies["username"];   ///LOGIN ADDED
+  console.log("Logging in...")  ///LOGIN ADDED
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("username");              ////// LOGOUT ADDED
   res.redirect("/urls");
+  console.log("Logging out..")
 });
 
 

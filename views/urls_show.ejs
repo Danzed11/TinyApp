@@ -13,13 +13,13 @@
 
 </header>
 <body style="font-size:20px; padding:50px;">
-  <h2>Loop</h2>
   <h3>My TinyApp</h3>
   <ul>
       <li> <%=shortURL%>-  <a href= <%=longURL %>> <%= longURL %> </a> </li>
        <form method="POST" action="/urls/<%= shortURL %>/update">
-         <p>Change Long URL: <input name="longURL" type="text"><input type="Submit" ></p>
-          
+         <label for="newURL">Update URL:</label>
+        <input class="form-control" type="text" value="<%= longURL %>" name="longURL" placeholder="http://" style="width: 300px; margin: 1em">
+        <button type="submit" class="btn btn-primary">Update</button> 
        </form>
   </ul>    
 </body>
