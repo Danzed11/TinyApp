@@ -5,9 +5,7 @@ const bodyParser = require("body-parser");
 var cookieParser = require('cookie-parser')
 var app = express()
 app.use(cookieParser())
-
 app.use(bodyParser.urlencoded({extended: true}));
-
 app.set("view engine", "ejs");
 
 function generateRandomString(length) {
@@ -50,8 +48,9 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString(6);
   let longstring = req.body.longURL;
   urlDatabase[shortURL] = "https://" + longstring;
+  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, username: req.cookies["username"]}
   console.log(urlDatabase);
-  res.redirect("/urls/" + shortURL );
+  res.redirect("/urls/" + shortURL ); //////////ADD TEMPLATE VARIABLES?!?!?!?!?!?!?!?//////////
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -60,18 +59,30 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };   //When sending variables to and EJS template, we need to have them inside an object
+  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };   //When sending variables to and EJS template, we need to have them inside an object
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {username: req.cookies["username"]}
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   //const shortURL = req.params.shortURL
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
     res.render("urls_show", templateVars);
+});
+
+app.post("/login", (req,res) => {
+  res.cookie("username", req.body.username);
+  // userCookie.username = req.cookies["username"];   ///LOGIN ADDED
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");              ////// LOGOUT ADDED
+  res.redirect("/urls");
 });
 
 
