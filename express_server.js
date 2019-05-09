@@ -64,7 +64,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {username: req.cookies["username"]}
+  let templateVars = {username: req.cookies["username"]}          // REDIRECTING TO UPDATE PAGE CURRENTLY
   res.render("urls_new", templateVars);
 });
 
@@ -85,6 +85,16 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
   console.log("Logging out..")
 });
+
+app.get("/register", (req, res) => {
+    let templateVars = {username: req.cookies["username"]};
+  res.render("registration", templateVars);
+});
+app.post("/register", (req, res) => {
+  let templateVars = {username: req.cookies["username"]}; 
+  res.redirect("/urls");                                                                                                                                                                                                                                                                                                                                                                                                                                         
+})
+
 
 
 app.listen(PORT, () => {
