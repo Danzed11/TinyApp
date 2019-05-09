@@ -62,7 +62,7 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString(6);
   let longstring = req.body.longURL;
   urlDatabase[shortURL] = "https://" + longstring;
-  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, username: req.cookies["username"]}
+  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, userlist: users, user_id: req.cookies["user_id"]}
   console.log(urlDatabase);
   res.redirect("/urls/" + shortURL ); //////////ADD TEMPLATE VARIABLES?!?!?!?!?!?!?!?//////////
 });
@@ -73,35 +73,35 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };   //When sending variables to and EJS template, we need to have them inside an object
+  let templateVars = { urls: urlDatabase, userlist: users, user_id: req.cookies["user_id"] };   //When sending variables to and EJS template, we need to have them inside an object
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {username: req.cookies["username"]}          // REDIRECTING TO UPDATE PAGE CURRENTLY
+  let templateVars = { userlist: users, user_id: req.cookies["user_id"]}          // REDIRECTING TO UPDATE PAGE CURRENTLY
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   //const shortURL = req.params.shortURL
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"]};
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], userlist: users, user_id: req.cookies["user_id"]};
     res.render("urls_show", templateVars);
 });
 
 app.post("/login", (req,res) => {
-  res.cookie("username", req.body.username);
-  console.log("Logging in...")  ///LOGIN ADDED
+  res.cookie("user_id", req.body.email);
+  console.log("Logging in...")  /////////////////////////CHECK out THIS ONE !!!
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");              ////// LOGOUT ADDED
+  res.clearCookie("user_id");              ////// LOGOUT ADDED
   res.redirect("/urls");
   console.log("Logging out..")
 });
 
 app.get("/register", (req, res) => {
-    let templateVars = { username: req.cookies["username"], error: undefined
+    let templateVars = { userlist: users, user_id: req.cookies["user_id"], error: undefined
     };
   res.render("registration", templateVars);
 });
@@ -119,7 +119,7 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  res.cookie("username", req.body.email)                     //Cookies for email memory -- Trying to stay logged in
+  res.cookie("user_id", newID)                     //Cookies for email memory -- Trying to stay logged in
   res.redirect("/urls");
   console.log(users);
                                                                                                                                                                                                                                                                                                                                                                                                                   

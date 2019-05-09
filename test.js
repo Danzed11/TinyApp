@@ -11,4 +11,4 @@ const users = {
   }
 }
 
-console.log(users[userRandomID][id]);
+console.log(users.userRandomID.id);
