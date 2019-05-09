@@ -108,9 +108,9 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
-    console.log("empty creds");
     const templateVars = { error: "Email and Password required", username: undefined
-    }
+    
+    } 
     return res.status(400).render("registration", templateVars);
   }
   let newID = generateRandomString(6);
@@ -125,7 +125,7 @@ app.post("/register", (req, res) => {
                                                                                                                                                                                                                                                                                                                                                                                                                   
 })
 
-
+//if (users[email = req.body.email])
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
