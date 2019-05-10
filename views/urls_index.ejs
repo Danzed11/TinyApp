@@ -11,11 +11,14 @@
   
 
 <header>
-<a href="/register"> Register here</a>
+  
   <% include ./partials/_header.ejs %>
   
 </header>
 <body style="font-size:20px; padding:50px;">
+
+
+
   <h2>My URLs</h2>
   <ul>
       <% for (url in urls) { %>
@@ -29,6 +32,7 @@
     <%  }; %>
     
   </ul>    
+      
 </body>
 </html>
 

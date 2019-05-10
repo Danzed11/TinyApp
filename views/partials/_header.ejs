@@ -3,19 +3,18 @@
         
         <h1><a href="/urls">TinyApp</a> </h1>
         <div style="display: inline;">
-            <% if(!username){ %>
-            <form name="username" method="POST"  action="/login">
-                   <div style="background-color:50%;">
-                     <input class="form-control" type="email" name="username" placeholder="Input Username" style="width: 300px; margin: 1em">
-                     <input class="form-control" type="password" name="password" placeholder="Password" style="width: 300px; margin: 1em"> 
-                        <button type="submit" class="btn btn-primary">Login</button>
-            </form>
+            <% if(!user_id){ %>
+                <nav><a href="/register"> Register</a> <%= "|" %>
+                    
+                    <a href="/login"> Login</a>
+              </nav>
             <% } else{ %>
-                <h2>User: <%= username %>
+                <h2>User: <%= user_id %>
                 <form method="POST" action="/logout">
-                     <button type="submit" class="btn btn-primary">Logout</button>
-                     </form>
+                    <button type="submit" class="btn btn-primary">Logout</button>
+                </form>
+                <h5><a class="hideOnShow" href="/urls/new/"> Create New TinyURL</a></h5>
              <% } %>
         </div>
-        <h5><a class="hideOnShow" href="/urls/new/"> Create New TinyURL</a></h5>
+       
     </header></div>
