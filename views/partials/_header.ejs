@@ -3,7 +3,7 @@
         
         <h1><a href="/urls">TinyApp</a> </h1>
         <div style="display: inline;">
-            <% if(!user_id){ %>
+            <% if(!(user_id && userlist[user_id])){ %>
                 <nav><a href="/register"> Register</a> <%= "|" %>
                     
                      <a href="/login"> Login</a>

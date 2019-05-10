@@ -12,35 +12,34 @@
 
 <header>
   
-  <% include ./partials/_header.ejs %>
   
 </header>
 <body style="font-size:20px; padding:50px;">
 
+    <% include ./partials/_header.ejs %>
 
+    
     <div style="display: inline;">
-    <% if(userlist[user_id] === undefined){ %>
-    <div style="padding-left: 1em; padding-right: 1em; ">
-      <h1>Welcome to TinyApp</h1>
-      <p>Please log in or register </p>
-    </div>
-    <%} else {%>
-      <h2>TinyApp URLS for: <%= userlist[user_id].email %>:
-      <ul>
-      <% for (var entry in urls) {%>
-        <li><%= entry %>: <%= urls[entry] %></li>
-        <a href="/urls/<%= entry %>">Edit</a>
-        <form method="POST" action="/urls/<%= entry %>/delete">
-          <button type="submit" class="btn btn-primary">DELETE</button>
-        </form>
-        </br>
-      <% }; %>
-      </ul>
-    <% }%>
-    </div>
-      
+        <% if(userlist[user_id] === undefined){ %>
+        <div style="padding-left: 1em; padding-right: 1em; ">
+          <h1>Welcome to TinyApp</h1>
+          <p>Please log in or register </p>
+        </div>
+        <%} else {%>
+          <h2>TinyApp URLS for: <%= userlist[user_id].email %>:
+          <ul>
+          <% for (var entry in urls) {%>
+            <li><%= entry %>: <%= urls[entry].longURL %></li>
+            <a href="/urls/<%= entry %>">Edit</a>
+            <form method="POST" action="/urls/<%= entry %>/delete">
+              <button type="submit" class="btn btn-primary">DELETE</button>
+            </form>
+            </br>
+          <% }; %>
+          </ul>
+        <% }%>
+        </div>
 </body>
 </html>
-
 
 
