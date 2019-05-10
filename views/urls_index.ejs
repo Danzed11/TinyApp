@@ -27,14 +27,14 @@
     <%} else {%>
       <h2>TinyApp URLS for: <%= userlist[user_id].email %>:
       <ul>
-      <% for (var entry in urls) { if (urls[entry] === user_id) {%>
-        <li><%= entry %>: <a href="<%= urls[entry].longURL %>"><%= urls[entry].longURL %></a></li>
-        <a href="urls/<%- entry %>">Edit</a>
+      <% for (var entry in urls) {%>
+        <li><%= entry %>: <%= urls[entry] %></li>
+        <a href="/urls/<%= entry %>">Edit</a>
         <form method="POST" action="/urls/<%= entry %>/delete">
-          <button type="submit">DELETE</button>
+          <button type="submit" class="btn btn-primary">DELETE</button>
         </form>
         </br>
-      <%}; }; %>
+      <% }; %>
       </ul>
     <% }%>
     </div>
