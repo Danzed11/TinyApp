@@ -88,16 +88,26 @@ app.get("/urls/:shortURL", (req, res) => {
     res.render("urls_show", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  let templateVars = {urls: urlDatabase, userlist: users, user_id: req.cookies["user_id"]};
+  res.render("login", templateVars);
+})
+
 app.post("/login", (req,res) => {
-  res.cookie("user_id", req.body.email);
-  console.log("Logging in...")  /////////////////////////CHECK out THIS ONE !!!
+  let tempID = emailToId(req.body.email);
+    if (tempID === false) {
+      res.send(`User not found </br><a href="/login"> Go Back</a>`) //USER not found if not in system
+    } else if (req.body.password === users[tempID].password) {
+      res.cookie("user_id", tempID);
+    } else {
+      res.send(`Password incorrect.</br> <a href="/login"> Go Back</a>`) //Or Password incorrect
+    }
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");              ////// LOGOUT ADDED
   res.redirect("/urls");
-  console.log("Logging out..")
 });
 
 app.get("/register", (req, res) => {
@@ -107,26 +117,50 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (req.body.email === "" || req.body.password === "") {
-    const templateVars = { error: "Email and Password required", username: undefined
-    
-    } 
-    return res.status(400).render("registration", templateVars);
-  }
+  if (inUsers(users, 'email', req.body.user)) {
+    res.status(400).send('email in use</br><a href="/register">Go Back</a>');
+  } else {
+  
   let newID = generateRandomString(6);
   users[newID] = {
     id: newID,
     email: req.body.email,
     password: req.body.password
   };
-  res.cookie("user_id", newID)                     //Cookies for email memory -- Trying to stay logged in
+  res.cookie("user_id", req.body.email)                     //Cookies for email memory -- Trying to stay logged in
   res.redirect("/urls");
   console.log(users);
                                                                                                                                                                                                                                                                                                                                                                                                                   
-})
+}});
+
 
 //if (users[email = req.body.email])
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+function idToEmail(user_id) {
+  if (users[user_id].email !== undefined) {
+    return users[user_id].email;
+  } else return "None";
+};
+
+
+function emailToId(input) {
+  for (let id in users) {
+    if (users[id].email === input) {
+      return id;
+    };
+  };
+  return false;
+}; 
+
+function inUsers(obj, key, value) {
+  for (let entry in obj) {
+    if (obj[entry][key] === value) {
+      return true;
+    };
+  }
+  return false;
+};
