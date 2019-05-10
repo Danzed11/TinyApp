@@ -6,10 +6,10 @@
             <% if(!user_id){ %>
                 <nav><a href="/register"> Register</a> <%= "|" %>
                     
-                    <a href="/login"> Login</a>
+                     <a href="/login"> Login</a>
               </nav>
             <% } else{ %>
-                <h2>User: <%= user_id %>
+                <h2>User: <%= userlist[user_id].email %>
                 <form method="POST" action="/logout">
                     <button type="submit" class="btn btn-primary">Logout</button>
                 </form>

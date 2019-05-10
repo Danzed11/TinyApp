@@ -18,20 +18,26 @@
 <body style="font-size:20px; padding:50px;">
 
 
-
-  <h2>My URLs</h2>
-  <ul>
-      <% for (url in urls) { %>
-        <li><%= url %>: <a href="<%= urls[url] %>"><%= urls[url] %></a></li>
-        <form method="POST" action="/urls/<%= url %>/delete">
-          <button type="submit" class="btn btn-primary">DELETE</button>
+    <div style="display: inline;">
+    <% if(userlist[user_id] === undefined){ %>
+    <div style="padding-left: 1em; padding-right: 1em; ">
+      <h1>Welcome to TinyApp</h1>
+      <p>Please log in or register </p>
+    </div>
+    <%} else {%>
+      <h2>TinyApp URLS for: <%= userlist[user_id].email %>:
+      <ul>
+      <% for (var entry in urls) { if (urls[entry] === user_id) {%>
+        <li><%= entry %>: <a href="<%= urls[entry].longURL %>"><%= urls[entry].longURL %></a></li>
+        <a href="urls/<%- entry %>">Edit</a>
+        <form method="POST" action="/urls/<%= entry %>/delete">
+          <button type="submit">DELETE</button>
         </form>
-        <form>
-          <a href="/urls/<%= url %>">Edit</a> 
-        </form>
-    <%  }; %>
-    
-  </ul>    
+        </br>
+      <%}; }; %>
+      </ul>
+    <% }%>
+    </div>
       
 </body>
 </html>

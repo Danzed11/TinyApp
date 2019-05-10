@@ -51,7 +51,7 @@ app.post("/urls/:shortURL/update", (req, res) => {
   let longstring = req.body.longURL;
   urlDatabase[editId] = longstring;        //Work on this one
   console.log("editing>>>", urlDatabase);
-  res.redirect("/urls/");
+  res.redirect(`/urls/${editId}`);
 });
 app.post("/urls/:shortURL/delete", (req, res) => { //ROUTE to handle delete buttons
   delete urlDatabase[req.params.shortURL];
@@ -78,6 +78,9 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies["user_id"]) {      //If theres no logged in user that tries to access /new. >>> to /urls
+    res.redirect("/urls");
+  }
   let templateVars = { userlist: users, user_id: req.cookies["user_id"]}          // REDIRECTING TO UPDATE PAGE CURRENTLY
   res.render("urls_new", templateVars);
 });
@@ -93,17 +96,39 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 })
 
-app.post("/login", (req,res) => {
-  let tempID = emailToId(req.body.email);
-    if (tempID === false) {
-      res.send(`User not found </br><a href="/login"> Go Back</a>`) //USER not found if not in system
-    } else if (req.body.password === users[tempID].password) {
-      res.cookie("user_id", tempID);
-    } else {
-      res.send(`Password incorrect.</br> <a href="/login"> Go Back</a>`) //Or Password incorrect
-    }
+app.post("/login", (req,res) => { //// WORK ON THIS ONE MAN
+  let email = req.body.email;
+  let user = emailLookup(email);
+
+  if (!user) {
+    res.send("Error 403 Bad Request. You're not registered");
+  } else if (req.body.password !== user.password) {
+    res.send("Error 403 You are already registered");
+  } else {
+    let newID = generateRandomString(6);
+  users[newID] = {
+    id: newID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  console.log(users);
+  res.cookie("user_id", users[newID].id)                     //Cookies for email memory -- Trying to stay logged in
   res.redirect("/urls");
-});
+                                                                                                                                                                                                                                                                                                                                                                                                                  
+}});
+
+
+
+  //   let tempID = emailLookup(email);
+//     if (tempID === false) {
+//       res.send(`User not found </br><a href="/login"> Go Back</a>`) //USER not found if not in system
+//     } else if (req.body.password === users[tempID].password) {
+//       res.cookie("user_id", tempID);
+//     } else {
+//       res.send(`Password incorrect.</br> <a href="/login"> Go Back</a>`) //Or Password incorrect
+//     }
+//   res.redirect("/urls");
+// });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");              ////// LOGOUT ADDED
@@ -111,25 +136,30 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-    let templateVars = { userlist: users, user_id: req.cookies["user_id"], error: undefined
-    };
+    let templateVars = { userlist: users, user_id: req.cookies["user_id"], error: undefined};
   res.render("registration", templateVars);
 });
 
-app.post("/register", (req, res) => {
-  if (inUsers(users, 'email', req.body.user)) {
-    res.status(400).send('email in use</br><a href="/register">Go Back</a>');
+app.post("/register", (req, res) => {         //done Friday Morn
+  let email = req.body.email;
+  let user = emailLookup(email);
+  console.log(user);
+
+  if (!req.body.email || !req.body.password) {
+    res.send("400 Bad Request");
+  } else if (user) {
+    res.send("You are already registered");
   } else {
   
-  let newID = generateRandomString(6);
+    let newID = generateRandomString(6);
   users[newID] = {
     id: newID,
     email: req.body.email,
     password: req.body.password
   };
-  res.cookie("user_id", req.body.email)                     //Cookies for email memory -- Trying to stay logged in
-  res.redirect("/urls");
   console.log(users);
+  res.cookie("user_id", users[newID].id)                     //Cookies for email memory -- Trying to stay logged in
+  res.redirect("/urls");
                                                                                                                                                                                                                                                                                                                                                                                                                   
 }});
 
@@ -140,21 +170,45 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-function idToEmail(user_id) {
-  if (users[user_id].email !== undefined) {
-    return users[user_id].email;
-  } else return "None";
-};
 
+// function emailToId(input) {
+//   for (let id in users) {
+//     if (users[id].email === input) {
+//       return id;
+//     };
+//   };
+//   return false;
+// }; 
 
-function emailToId(input) {
+function emailLookup (email) {
   for (let id in users) {
-    if (users[id].email === input) {
-      return id;
-    };
-  };
-  return false;
-}; 
+    console.log(id);
+    if (email === users[id].email) {
+    return users[id];
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function inUsers(obj, key, value) {
   for (let entry in obj) {
@@ -164,3 +218,6 @@ function inUsers(obj, key, value) {
   }
   return false;
 };
+
+
+  
