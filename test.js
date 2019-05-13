@@ -13,23 +13,19 @@ const users = {
 
 console.log(users.userRandomID.id);
 
-
-<% if(userlist[user_id] === undefined){ %>
-  <div style="padding-left: 1em; padding-right: 1em; ">
-    <h1>Welcome to TinyApp</h1>
-      <p>Please log in or register to shorten URLs</p>
-  </div>
-  <%} else {%>
-    <h2>tinyApp URLS for <%= userlist[user_id].email %>:
-    <ul>
-    <% for (var entry in urls) { if (urls[entry] === user_id) {%>
-      <li><%= entry %>: <a href="<%= urls[entry].longURL %>"><%= urls[entry].longURL %></a></li>
-      <a href="urls/<%- entry %>">Edit</a>
-      <form method="POST" action="/urls/<%= entry %>/delete">
-        <button type="submit">DELETE</button>
-      </form>
-      </br>
-    <%}; }; %>
-    </ul>
-  <% }%>
-  </div>
+function emailLookup(email){
+  for (userId in users){
+   if (email === users[userId].email){
+     return userId;
+   }
+  }
+  }
+  if (!emailLookup(email)) {
+   res.render(“403”);
+  } else if (password !== users[userId].password){
+   res.render(“403");
+  } else {
+   res.cookie(“user_id”, users[userId].id);
+   res.redirect(“/urls”);
+  }
+  });

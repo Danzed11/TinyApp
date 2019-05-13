@@ -2,12 +2,19 @@ var express = require("express");
 var app = express();
 var PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-var cookieParser = require('cookie-parser')
+var cookieSession = require('cookie-session');
 var app = express()
 const bcrypt = require('bcrypt');
-app.use(cookieParser())
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1'],
+
+   // Cookie Options
+   maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }));
 
 function generateRandomString(length) {
   let letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
@@ -22,16 +29,15 @@ function generateRandomString(length) {
   
 
   const urlDatabase = {
-    b6UTxQ:   { longURL: "https://www.tsn.ca",
+            b6UTxQ:
+              { longURL: "https://www.tsn.ca",
                 userID: "user2RandomID",
-                visited : 0,
-
               },
-    wIn7sz:   { longURL: "https://www.google.ca",
+            wIn7sz:   
+              { longURL: "https://www.google.ca",
                 userID: "123",
-            
               }
-  };
+   };
 
 const users = { 
   
@@ -41,7 +47,7 @@ const users = {
     password: ""
     },
  "userRandomID": {
-    id: "userRandomID",             /////// MAYBE CLEAR??
+    id: "userRandomID",
     email: "user@example.com", 
     password: "purple-monkey-dinosaur"
   },
@@ -53,21 +59,15 @@ const users = {
 }
 
 
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-// app.post("/urls/login", (req, res) => {
-//   res.cookie("username", req.body["username"]);       //1st cookie step
-//   res.redirect("/urls");
-// })
+
 app.post("/urls/:shortURL/update", (req, res) => {
   const editId = req.params.shortURL;
   let longstring = req.body.longURL;
-  urlDatabase[editId].longURL = longstring;        //Work on this one
+  urlDatabase[editId].longURL = longstring;
   console.log("editing>>>", urlDatabase);
   res.redirect(`/urls/${editId}`);
 });
-app.post("/urls/:shortURL/delete", (req, res) => { //ROUTE to handle delete buttons
+app.post("/urls/:shortURL/delete", (req, res) => { 
   delete urlDatabase[req.params.shortURL];
   console.log("deleting");
   res.redirect("/urls");
@@ -77,11 +77,11 @@ app.post("/urls", (req, res) => {
   let longstring = req.body.longURL;
   urlDatabase[shortURL] = {
     longURL: "https://" + longstring,
-    userID: req.cookies["user_id"]
+    userID: req.session.user_id
   };
-  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, userlist: users, user_id: req.cookies["user_id"]}
+  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, userlist: users, user_id: req.session.user_id}
   console.log(urlDatabase);
-  res.redirect("/urls/" + shortURL ); //////////ADD TEMPLATE VARIABLES?!?!?!?!?!?!?!?//////////
+  res.redirect("/urls/" + shortURL );
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -90,17 +90,18 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user_id = req.cookies["user_id"] 
+  const user_id = req.session.user_id 
   const userURLS = urlsForUser(user_id)                  ///////Function for filtering URLS, based on COOKIE memory/////?>>>>/>?./
   let templateVars = { urls: userURLS, userlist: users, user_id };   //When sending variables to and EJS template, we need to have them inside an object
   res.render("urls_index", templateVars);
+  console.log(templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies["user_id"]) {      //If theres no logged in user that tries to access /new. >>> to /urls
+  if (!req.session.user_id) {      //If theres no logged in user that tries to access /new. >>> to /urls
     res.redirect("/urls");
   }
-  let templateVars = { userlist: users, user_id: req.cookies["user_id"]}          // REDIRECTING TO UPDATE PAGE CURRENTLY
+  let templateVars = { userlist: users, user_id: req.session.user_id}          // REDIRECTING TO UPDATE PAGE CURRENTLY
   res.render("urls_new", templateVars);
 });
 
@@ -114,17 +115,17 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: shortURL,
     longURL: urlObj.longURL,
     userlist: users,
-    user_id: req.cookies["user_id"]
+    user_id: req.session.user_id
   };
     res.render("urls_show", templateVars);
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = {urls: urlDatabase, userlist: users, user_id: req.cookies["user_id"]};
+  let templateVars = {urls: urlDatabase, userlist: users, user_id: req.session.user_id };
   res.render("login", templateVars);
 })
 
-app.post("/login", (req,res) => { //// WORK ON THIS ONE MAN
+app.post("/login", (req,res) => { 
   let email = req.body.email;
   let user = emailLookup(email);
 console.log(req.body);
@@ -134,19 +135,19 @@ console.log(req.body);
     res.send("Error 403 Wrong Password");
   } else {
     
-  res.cookie("user_id", user.id)                     //Cookies for email memory -- Trying to stay logged in
+  req.session.user_id = user.id;
   res.redirect("/urls");
                                                                                                                                                                                                                                                                                                                                                                                                                   
 }});
 
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");              ////// LOGOUT ADDED
+  req.session = null;
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
-    let templateVars = { userlist: users, user_id: req.cookies["user_id"]};
+    let templateVars = { userlist: users, user_id: req.session.user_id };
   res.render("registration", templateVars);
 });
 
@@ -167,7 +168,7 @@ app.post("/register", (req, res) => {
     password: hashedPassword(req.body.password)
   };
   console.log(users);
-  res.cookie("user_id", newID)                     //Cookies for email memory -- Trying to stay logged in
+  req.session.user_id = newID                   
   res.redirect("/urls");
                                                                                                                                                                                                                                                                                                                                                                                                                   
 }});
@@ -198,7 +199,6 @@ function emailLookup (email) {
   }
 }
 
-
 function urlsForUser(userID){
   let userURLs = {};
   for (let urlId in urlDatabase){
@@ -209,23 +209,3 @@ function urlsForUser(userID){
   }
   return userURLs;
 }
-
-
-
-
-
-
-
-
-
-function inUsers(obj, key, value) {
-  for (let entry in obj) {
-    if (obj[entry][key] === value) {
-      return true;
-    };
-  }
-  return false;
-};
-
-
-  
