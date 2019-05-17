@@ -12,7 +12,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1'],
 
-   // Cookie Options
+   // Cookie Options //
    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }));
 
