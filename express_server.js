@@ -25,9 +25,43 @@ function generateRandomString(length) {
   }
   return result;
   }
-  console.log(generateRandomString(6));
   
+  //Hashes a password.
+  function hashedPassword(password) {
+    return bcrypt.hashSync(password, 10)
+  };
+  
+  function shortURLExists(shorturl) {
+    if (urlDatabase[shorturl]) return true;
+    else return false;
+  };
 
+  function emailLookup (email) {
+    for (let id in users) {
+      console.log(id);
+      if (email === users[id].email) {
+      return users[id];
+      }
+    }
+  }
+  function addhttp(url) {
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'http://' + url;
+    };
+    return url;
+  };
+  
+  function urlsForUser(userID){
+    let userURLs = {};
+    for (let urlId in urlDatabase){
+      let url = urlDatabase[urlId];
+      if (url.userID === userID){
+        userURLs[urlId] = url;
+      }
+    }
+    return userURLs;
+  }
+  
   const urlDatabase = {
             b6UTxQ:
               { longURL: "https://www.tsn.ca",
@@ -59,49 +93,50 @@ const users = {
 }
 
 
-
 app.post("/urls/:shortURL/update", (req, res) => {
-  const editId = req.params.shortURL;
-  let longstring = req.body.longURL;
-  urlDatabase[editId].longURL = longstring;
-  console.log("editing>>>", urlDatabase);
-  res.redirect(`/urls/${editId}`);
+  if (shortURLExists(req.params.shortURL) && (req.session.user_id === urlDatabase[req.params.shortURL].userID)) {
+    urlDatabase[req.params.shortURL].longURL = (req.body.longURL);
+    return res.redirect("/urls");
+  }
+    res.redirect("/urls");
 });
+
 app.post("/urls/:shortURL/delete", (req, res) => { 
   delete urlDatabase[req.params.shortURL];
-  console.log("deleting");
   res.redirect("/urls");
-});
-app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString(6);
-  let longstring = req.body.longURL;
-  urlDatabase[shortURL] = {
-    longURL: "https://" + longstring,
-    userID: req.session.user_id
-  };
-  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, userlist: users, user_id: req.session.user_id}
-  console.log(urlDatabase);
-  res.redirect("/urls/" + shortURL );
-});
-
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
-  res.redirect(longURL);
 });
 
 app.get("/urls", (req, res) => {
   const user_id = req.session.user_id 
-  const userURLS = urlsForUser(user_id)                  ///////Function for filtering URLS, based on COOKIE memory/////?>>>>/>?./
-  let templateVars = { urls: userURLS, userlist: users, user_id };   //When sending variables to and EJS template, we need to have them inside an object
+  const userURLS = urlsForUser(user_id)                  
+  let templateVars = { urls: userURLS, userlist: users, user_id };   
   res.render("urls_index", templateVars);
-  console.log(templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  let shortURL = generateRandomString(6);
+  let longstring = req.body.longURL;
+  urlDatabase[shortURL] = {
+    longURL: addhttp(longstring),
+    userID: req.session.user_id
+  };
+  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, userlist: users, user_id: req.session.user_id}
+  res.redirect("/urls/" + shortURL );
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  if(shortURLExists(req.params.shortURL)) {
+    let outboundURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(outboundURL);
+  };
+  res.status(400).send('Shorted URL does not exist.</br><a href="/urls">Go Back</a>');
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.session.user_id) {      //If theres no logged in user that tries to access /new. >>> to /urls
+  if (!req.session.user_id) {      
     res.redirect("/urls");
   }
-  let templateVars = { userlist: users, user_id: req.session.user_id}          // REDIRECTING TO UPDATE PAGE CURRENTLY
+  let templateVars = { userlist: users, user_id: req.session.user_id}          
   res.render("urls_new", templateVars);
 });
 
@@ -128,7 +163,6 @@ app.get("/login", (req, res) => {
 app.post("/login", (req,res) => { 
   let email = req.body.email;
   let user = emailLookup(email);
-console.log(req.body);
   if (!user) {
     res.send("Error 403 Bad Request. You're not registered");
   } else if (!bcrypt.compareSync(req.body.password, user.password)) {
@@ -154,20 +188,17 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {         
   let email = req.body.email;
   let user = emailLookup(email);
-  console.log(user);
   if (!req.body.email || !req.body.password) {
     res.send("400 Bad Request");
   } else if (user) {
     res.send("You are already registered");
   } else {
-  
-    let newID = generateRandomString(6);
-  users[newID] = {
-    id: newID,
-    email: req.body.email,
-    password: hashedPassword(req.body.password)
+      let newID = generateRandomString(6);
+      users[newID] = {
+        id: newID,
+        email: req.body.email,
+        password: hashedPassword(req.body.password)
   };
-  console.log(users);
   req.session.user_id = newID                   
   res.redirect("/urls");
                                                                                                                                                                                                                                                                                                                                                                                                                   
@@ -179,33 +210,3 @@ app.listen(PORT, () => {
 });
 
 
-function idToEmail(user_id) {
-  if (users[user_id].email !== undefined) {
-    return users[user_id].email;
-  } else return "None";
-};
-
-//Hashes a password.
-function hashedPassword(password) {
-  return bcrypt.hashSync(password, 10)
-};
-
-function emailLookup (email) {
-  for (let id in users) {
-    console.log(id);
-    if (email === users[id].email) {
-    return users[id];
-    }
-  }
-}
-
-function urlsForUser(userID){
-  let userURLs = {};
-  for (let urlId in urlDatabase){
-    let url = urlDatabase[urlId];
-    if (url.userID === userID){
-      userURLs[urlId] = url;
-    }
-  }
-  return userURLs;
-}
