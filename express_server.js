@@ -31,6 +31,7 @@ function generateRandomString(length) {
     return bcrypt.hashSync(password, 10)
   };
   
+  
   function shortURLExists(shorturl) {
     if (urlDatabase[shorturl]) return true;
     else return false;
@@ -73,8 +74,9 @@ function generateRandomString(length) {
               }
    };
 
+  //Mock Database
+
 const users = { 
-  
  "None": {
     id: "None",
     email: "no@email.com",
@@ -106,6 +108,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+
+//HomePage route
 app.get("/urls", (req, res) => {
   const user_id = req.session.user_id 
   const userURLS = urlsForUser(user_id)                  
@@ -124,6 +128,7 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls/" + shortURL );
 });
 
+// You don't have the short URL privs
 app.get("/u/:shortURL", (req, res) => {
   if(shortURLExists(req.params.shortURL)) {
     let outboundURL = urlDatabase[req.params.shortURL].longURL;
@@ -143,8 +148,9 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
   const urlObj = urlDatabase[shortURL]
-  if (!urlObj) {
-    return res.redirect("/urls/new")
+  
+  if (!urlObj || req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
+    return res.status(403).send('Access to this page is denied.</br><a href="/urls">Go Back</a>');
   }
   let templateVars = {
     shortURL: shortURL,
@@ -155,6 +161,8 @@ app.get("/urls/:shortURL", (req, res) => {
     res.render("urls_show", templateVars);
 });
 
+
+//Login 
 app.get("/login", (req, res) => {
   let templateVars = {urls: urlDatabase, userlist: users, user_id: req.session.user_id };
   res.render("login", templateVars);
@@ -179,6 +187,9 @@ app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
+
+
+// Register a new user
 
 app.get("/register", (req, res) => {
     let templateVars = { userlist: users, user_id: req.session.user_id };
