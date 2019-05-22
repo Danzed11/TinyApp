@@ -39,7 +39,6 @@ function generateRandomString(length) {
 
   function emailLookup (email) {
     for (let id in users) {
-      console.log(id);
       if (email === users[id].email) {
       return users[id];
       }
@@ -74,7 +73,7 @@ function generateRandomString(length) {
               }
    };
 
-  //Mock Database
+//Mock Database
 
 const users = { 
  "None": {
@@ -94,7 +93,7 @@ const users = {
   }
 }
 
-
+//User ability to update their URLs
 app.post("/urls/:shortURL/update", (req, res) => {
   if (shortURLExists(req.params.shortURL) && (req.session.user_id === urlDatabase[req.params.shortURL].userID)) {
     urlDatabase[req.params.shortURL].longURL = (req.body.longURL);
@@ -108,7 +107,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-
 //HomePage route
 app.get("/urls", (req, res) => {
   const user_id = req.session.user_id 
@@ -116,6 +114,10 @@ app.get("/urls", (req, res) => {
   let templateVars = { urls: userURLS, userlist: users, user_id };   
   res.render("urls_index", templateVars);
 });
+//Quick reroute to /urls/
+app.get("/", (req, res) => {
+  res.redirect("/urls/");
+})
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString(6);
@@ -124,7 +126,6 @@ app.post("/urls", (req, res) => {
     longURL: addhttp(longstring),
     userID: req.session.user_id
   };
-  let templateVars = { shortURL: shortURL, longURL: req.body.longURL, userlist: users, user_id: req.session.user_id}
   res.redirect("/urls/" + shortURL );
 });
 
@@ -137,14 +138,16 @@ app.get("/u/:shortURL", (req, res) => {
   res.status(400).send('Shorted URL does not exist.</br><a href="/urls">Go Back</a>');
 });
 
+//Allow user to create new URL IF user_id in DB
 app.get("/urls/new", (req, res) => {
-  if (!req.session.user_id) {      
+  if (!users[req.session.user_id]) {      
     res.redirect("/urls");
   }
   let templateVars = { userlist: users, user_id: req.session.user_id}          
   res.render("urls_new", templateVars);
 });
 
+//Non-users cannot access users URL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL
   const urlObj = urlDatabase[shortURL]
@@ -161,10 +164,10 @@ app.get("/urls/:shortURL", (req, res) => {
     res.render("urls_show", templateVars);
 });
 
-
-//Login 
 app.get("/login", (req, res) => {
-  let templateVars = {urls: urlDatabase, userlist: users, user_id: req.session.user_id };
+  let templateVars = {
+    user: users[req.session.user_id]
+  };
   res.render("login", templateVars);
 })
 
@@ -182,18 +185,22 @@ app.post("/login", (req,res) => {
                                                                                                                                                                                                                                                                                                                                                                                                                   
 }});
 
-
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
 
-
 // Register a new user
 
 app.get("/register", (req, res) => {
-    let templateVars = { userlist: users, user_id: req.session.user_id };
-  res.render("registration", templateVars);
+    if(users[req.session.user_id]){
+    res.redirect("/urls");
+  }else{
+    const templateVars = {
+      user: users[req.session.user_id]
+    };
+    res.render("registration",templateVars);
+  }
 });
 
 app.post("/register", (req, res) => {         
@@ -214,7 +221,6 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
                                                                                                                                                                                                                                                                                                                                                                                                                   
 }});
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
